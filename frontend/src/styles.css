@@ -90,6 +90,36 @@ body {
   box-shadow: inset 0 0 0 4px rgba(242, 215, 155, 0.55);
 }
 
+/* Practise verdicts — same treatment as a visited square, different colour. */
+.square-highlight.is-correct {
+  background: rgba(143, 194, 193, 0.48);
+  box-shadow: inset 0 0 0 4px #8fc2c1;
+}
+
+.square-highlight.is-wrong {
+  background: rgba(235, 174, 175, 0.48);
+  box-shadow: inset 0 0 0 4px #ebaeaf;
+}
+
+.square-highlight.is-selected {
+  background: rgba(242, 215, 155, 0.22);
+  box-shadow: inset 0 0 0 4px var(--gold-bright);
+}
+
+.move-dot {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: #c2c9cc;
+  box-shadow: 0 0 0 3px rgba(20, 10, 8, 0.4);
+}
+
+.board-click-layer {
+  position: absolute;
+  cursor: pointer;
+  background: transparent;
+}
+
 /* Backdrop coordinates are painted for white; mask them when the board flips. */
 .coord-patch {
   position: absolute;
@@ -368,14 +398,14 @@ body {
 .commentary-body {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 25px;
+  font-size: 18px;
   line-height: 1.38;
 }
 
 .commentary-end {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 21px;
+  font-size: 18px;
   color: #7a201b;
 }
 

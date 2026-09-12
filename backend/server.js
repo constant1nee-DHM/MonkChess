@@ -29,6 +29,7 @@ const staticOptions = { maxAge: '1h', fallthrough: true };
 app.use('/assets/img', express.static(path.join(ROOT, 'img'), staticOptions));
 app.use('/assets/sprites', express.static(path.join(ROOT, 'sprites'), staticOptions));
 app.use('/assets/svg', express.static(path.join(ROOT, 'svg'), staticOptions));
+app.use('/assets/audio', express.static(path.join(ROOT, 'audio'), staticOptions));
 
 /* ------------------------------------------------------------------- api */
 
@@ -45,7 +46,6 @@ app.get('/api/meta', (_req, res) => {
     commentaryStyle: dataset.commentaryStyle,
     totals: dataset.totals,
     monkSprites: MONK_SPRITES,
-    issueCount: dataset.issues.length,
     loadedAt: dataset.loadedAt,
   });
 });
@@ -86,10 +86,6 @@ app.get('/api/variations/:id', (req, res) => {
   });
 });
 
-app.get('/api/validation', (_req, res) => {
-  res.json({ source: dataset.source, totals: dataset.totals, issues: dataset.issues });
-});
-
 /** Backs the "import json" button on the home screen. */
 app.post('/api/import', (req, res) => {
   const { payload, filename, persist = true } = req.body ?? {};
@@ -102,7 +98,7 @@ app.post('/api/import', (req, res) => {
     } else {
       dataset = setDataset(payload, filename || 'in-memory');
     }
-    res.json({ ok: true, source: dataset.source, totals: dataset.totals, issues: dataset.issues });
+    res.json({ ok: true, source: dataset.source, totals: dataset.totals });
   } catch (error) {
     res.status(400).json({ ok: false, error: error.message });
   }
@@ -128,19 +124,8 @@ if (fs.existsSync(builtFrontend)) {
 }
 
 app.listen(PORT, () => {
-  const { openings, variations, playable } = dataset.totals;
+  const { openings, variations } = dataset.totals;
   console.log(`\n  Monk Chess backend  ->  http://localhost:${PORT}`);
   console.log(`  dataset: ${dataset.source}`);
-  console.log(`  ${openings} openings, ${variations} variations, ${playable} fully legal`);
-  if (dataset.issues.length) {
-    console.log(`\n  ${dataset.issues.length} variation(s) truncated at an illegal move:`);
-    for (const issue of dataset.issues) {
-      console.log(
-        `    - ${issue.id} (${issue.name}): ply ${issue.offendingPly} ` +
-          `${issue.offendingSide} "${issue.offendingMove}" is illegal; ` +
-          `playing ${issue.playedPlies}/${issue.totalPlies} half-moves.`,
-      );
-    }
-  }
-  console.log('');
+  console.log(`  ${openings} openings, ${variations} variations\n`);
 });

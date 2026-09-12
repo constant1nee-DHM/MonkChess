@@ -45,10 +45,36 @@ const squareToCoords = (square) => ({
   rank: Number(square[1]),
 });
 
-export default function ChessBoard({ fen, orientation = 'white', lastMove = null }) {
+const DOT = 30;
+
+export default function ChessBoard({
+  fen,
+  orientation = 'white',
+  lastMove = null,
+  marks = [],
+  dots = [],
+  selected = null,
+  onSquareClick = null,
+}) {
   const flipped = orientation === 'black';
   const pieces = parseFen(fen);
   const highlights = lastMove ? [lastMove.from, lastMove.to] : [];
+
+  /* One transparent overlay does the hit-testing; offsets are in the board's
+     own coordinate space, so the stage's scale transform does not matter. */
+  const handleClick = (event) => {
+    const col = Math.floor(event.nativeEvent.offsetX / SQUARE);
+    const row = Math.floor(event.nativeEvent.offsetY / SQUARE);
+    if (col < 0 || col > 7 || row < 0 || row > 7) return;
+    const file = flipped ? 7 - col : col;
+    const rank = flipped ? row + 1 : 8 - row;
+    onSquareClick(`${FILES[file]}${rank}`);
+  };
+
+  const cell = (square) => {
+    const { file, rank } = squareToCoords(square);
+    return { ...positionFor(file, rank, flipped), width: SQUARE, height: SQUARE };
+  };
 
   return (
     <div className="board-layer">
@@ -75,16 +101,15 @@ export default function ChessBoard({ fen, orientation = 'white', lastMove = null
         </>
       )}
 
-      {highlights.map((square) => {
-        const { file, rank } = squareToCoords(square);
-        return (
-          <div
-            key={square}
-            className="square-highlight"
-            style={{ ...positionFor(file, rank, flipped), width: SQUARE, height: SQUARE }}
-          />
-        );
-      })}
+      {highlights.map((square) => (
+        <div key={square} className="square-highlight" style={cell(square)} />
+      ))}
+
+      {marks.map(({ square, kind }) => (
+        <div key={`${kind}-${square}`} className={`square-highlight is-${kind}`} style={cell(square)} />
+      ))}
+
+      {selected && <div className="square-highlight is-selected" style={cell(selected)} />}
 
       {pieces.map(({ piece, square, file, rank }) => (
         <img
@@ -96,6 +121,30 @@ export default function ChessBoard({ fen, orientation = 'white', lastMove = null
           style={{ ...positionFor(file, rank, flipped), width: SQUARE, height: SQUARE }}
         />
       ))}
+
+      {dots.map((square) => {
+        const { left, top } = cell(square);
+        return (
+          <div
+            key={`dot-${square}`}
+            className="move-dot"
+            style={{
+              left: left + (SQUARE - DOT) / 2,
+              top: top + (SQUARE - DOT) / 2,
+              width: DOT,
+              height: DOT,
+            }}
+          />
+        );
+      })}
+
+      {onSquareClick && (
+        <div
+          className="board-click-layer"
+          style={{ left: FIELD_X, top: FIELD_Y, width: SQUARE * 8, height: SQUARE * 8 }}
+          onClick={handleClick}
+        />
+      )}
     </div>
   );
 }
