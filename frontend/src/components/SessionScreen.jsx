@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ChessBoard from './ChessBoard';
+import { playSfx, stopTheme } from '../audio';
+import SoundButton from './SoundButton';
 
 export default function SessionScreen({ variation, onExit }) {
   const [index, setIndex] = useState(0);
   const total = variation.plies.length;
+  const previousIndex = useRef(0);
+
+  // The theme is a home-screen thing — the session itself stays quiet.
+  useEffect(() => stopTheme(), []);
 
   const step = useCallback((delta) => setIndex((i) => Math.min(total, Math.max(0, i + delta))), [total]);
 
@@ -25,12 +31,19 @@ export default function SessionScreen({ variation, onExit }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [step, onExit]);
 
+  // One sound per position change, whichever control caused it.
+  useEffect(() => {
+    if (index === previousIndex.current) return;
+    previousIndex.current = index;
+    if (index === 0) return;
+    playSfx(variation.plies[index - 1].check ? 'check' : 'move');
+  }, [index, variation]);
+
   const current = index === 0 ? null : variation.plies[index - 1];
   const fen = current ? current.fen : variation.startFen;
   const monkSprite = current ? current.monkSprite : variation.intro.monkSprite;
   const comment = current ? current.comment : variation.intro.comment;
   const finished = index === total;
-  const truncated = variation.validation.status !== 'ok';
 
   const heading = current
     ? `${current.moveNumber}${current.side === 'White' ? '.' : '…'} ${current.san}`
@@ -61,11 +74,7 @@ export default function SessionScreen({ variation, onExit }) {
         </div>
         <p className="commentary-body">{comment}</p>
         {finished && total > 0 && (
-          <p className="commentary-end">
-            {truncated
-              ? 'The library’s line stops here — the next recorded move is not legal.'
-              : 'End of the line. Sit with the position a moment.'}
-          </p>
+          <p className="commentary-end">End of the line. Sit with the position a moment.</p>
         )}
       </div>
 
@@ -73,11 +82,16 @@ export default function SessionScreen({ variation, onExit }) {
         type="button"
         className="corner-button"
         style={{ left: 104, top: 1005 }}
-        onClick={onExit}
+        onClick={() => {
+          playSfx('click');
+          onExit();
+        }}
         title="Back to the home screen (Esc)"
       >
         exit
       </button>
+
+      <SoundButton left={168} top={1005} />
 
       <div className="session-controls">
         <button type="button" className="slab nav-slab" onClick={() => setIndex(0)} disabled={index === 0}>
@@ -95,7 +109,6 @@ export default function SessionScreen({ variation, onExit }) {
         <span className="session-caption-name">{variation.name}</span>
         <span className="session-caption-meta">
           {variation.opening} · playing {variation.side}
-          {truncated && <span className="footer-warn"> · line truncated</span>}
         </span>
       </div>
     </>

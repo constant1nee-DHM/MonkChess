@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getOpenings, importDataset } from '../api';
+import { playSfx, startTheme } from '../audio';
+import SoundButton from './SoundButton';
 
 /** Slot geometry lifted from img/home_screen_palace_shema.png (1920x1080). */
 const SIDE_SLOTS = [
@@ -8,13 +10,16 @@ const SIDE_SLOTS = [
   { move: 'other', top: 574 },
 ];
 
-export default function HomeScreen({ meta, firstMoves, onStart, onDatasetReplaced }) {
+export default function HomeScreen({ firstMoves, onStart, onDatasetReplaced }) {
   const [side, setSide] = useState(null);
   const [firstMove, setFirstMove] = useState(null);
   const [openings, setOpenings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState(null);
   const fileInput = useRef(null);
+
+  // The theme belongs to the home screen; the session runs quiet.
+  useEffect(() => startTheme(), []);
 
   useEffect(() => {
     if (!side || !firstMove) {
@@ -33,6 +38,7 @@ export default function HomeScreen({ meta, firstMoves, onStart, onDatasetReplace
   }, [side, firstMove]);
 
   const chooseSide = (next) => {
+    playSfx('click');
     setSide(next);
     setFirstMove(null);
   };
@@ -67,7 +73,10 @@ export default function HomeScreen({ meta, firstMoves, onStart, onDatasetReplace
           className={`slab move-slab ${firstMove === move && active ? 'is-selected' : ''}`}
           style={{ left, top, width: 168, height: 96 }}
           disabled={!usable}
-          onClick={() => setFirstMove(move)}
+          onClick={() => {
+            playSfx('click');
+            setFirstMove(move);
+          }}
           title={option.enabled ? `${option.count} variations` : 'No lines in the library yet'}
         >
           {move}
@@ -118,12 +127,12 @@ export default function HomeScreen({ meta, firstMoves, onStart, onDatasetReplace
                   key={variation.id}
                   type="button"
                   className="list-item"
-                  onClick={() => onStart(variation.id, side)}
+                  onClick={() => {
+                    playSfx('click');
+                    onStart(variation.id, side);
+                  }}
                 >
-                  <span className="list-item-name">
-                    {variation.name}
-                    {variation.status !== 'ok' && <span className="list-item-flag" title="Line is cut short by an illegal move in the dataset">!</span>}
-                  </span>
+                  <span className="list-item-name">{variation.name}</span>
                   <span className="list-item-meta">{variation.moveCount} moves</span>
                 </button>
               ))}
@@ -139,19 +148,20 @@ export default function HomeScreen({ meta, firstMoves, onStart, onDatasetReplace
         type="button"
         className="corner-button"
         style={{ left: 104, top: 920 }}
-        onClick={() => fileInput.current?.click()}
+        onClick={() => {
+          playSfx('click');
+          fileInput.current?.click();
+        }}
         title="Import an opening library JSON"
       >
         json
       </button>
       <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={handleImport} />
 
-      <div className="home-footer">
-        {notice ?? `${meta.totals.variations} variations · ${meta.source}`}
-        {meta.issueCount > 0 && !notice && (
-          <span className="footer-warn"> · {meta.issueCount} flagged</span>
-        )}
-      </div>
+      <SoundButton left={168} top={920} />
+
+      {/* Only surfaces import feedback — no idle dataset caption. */}
+      {notice && <div className="home-footer">{notice}</div>}
     </>
   );
 }

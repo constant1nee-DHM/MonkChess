@@ -53,7 +53,6 @@ export default function App() {
 
         {!error && meta && !variation && (
           <HomeScreen
-            meta={meta}
             firstMoves={firstMoves}
             onStart={startSession}
             onDatasetReplaced={loadLibrary}

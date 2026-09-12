@@ -12,8 +12,9 @@
   --gold-dim: #8a6a35;
   --ink: #3a2418;
 
-  --font-pixel: 'Silkscreen', 'Courier New', monospace;
-  --font-body: 'Pixelify Sans', 'Trebuchet MS', sans-serif;
+  /* One face throughout — pixel-shaped but readable at commentary sizes. */
+  --font-pixel: 'Pixel Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+  --font-body: 'Pixel Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
 }
 
 * {
@@ -132,32 +133,33 @@ body {
 
 .home-title {
   position: absolute;
-  left: 318px;
-  top: 236px;
-  width: 439px;
-  height: 116px;
+  left: 288px;
+  top: 226px;
+  width: 499px;
+  height: 126px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
+  white-space: nowrap;
 }
 
 .home-title-main {
   font-family: var(--font-pixel);
   font-weight: 700;
-  font-size: 44px;
+  font-size: 52px;
   letter-spacing: 2px;
   color: var(--gold-bright);
-  text-shadow: 4px 4px 0 #150c0a;
+  text-shadow: 5px 5px 0 #150c0a;
 }
 
 .home-title-sub {
   font-family: var(--font-pixel);
-  font-size: 20px;
-  letter-spacing: 6px;
-  color: var(--pillar);
-  text-shadow: 2px 2px 0 #150c0a;
+  font-size: 26px;
+  letter-spacing: 7px;
+  color: #c4423a;
+  text-shadow: 3px 3px 0 #150c0a;
 }
 
 /* ------------------------------------------------------------- buttons */
@@ -289,16 +291,6 @@ body {
   color: var(--gold);
 }
 
-.list-item-flag {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 0 7px;
-  font-family: var(--font-pixel);
-  font-size: 13px;
-  color: #1a0c08;
-  background: var(--gold);
-}
-
 /* --------------------------------------------------------- corner button */
 
 .corner-button {
@@ -325,16 +317,12 @@ body {
 
 .home-footer {
   position: absolute;
-  left: 180px;
-  top: 934px;
-  width: 720px;
+  left: 244px;
+  top: 936px;
+  width: 660px;
   font-family: var(--font-body);
-  font-size: 19px;
+  font-size: 18px;
   color: #9c7f5c;
-}
-
-.footer-warn {
-  color: #d98b4a;
 }
 
 /* --------------------------------------------------------- session: monk */
@@ -380,9 +368,8 @@ body {
 .commentary-body {
   margin: 0;
   font-family: var(--font-body);
-  font-weight: 500;
   font-size: 25px;
-  line-height: 1.32;
+  line-height: 1.38;
 }
 
 .commentary-end {
