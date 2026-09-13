@@ -1,2 +1,2 @@
 # MonkChess
-MonkChess is an opening trainer web-app.
+MonkChess is a chess opening trainer web-app.
